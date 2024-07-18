@@ -3,7 +3,7 @@
 Spatialize the gexf file of a very large network quicker than it would be done in Gephi.
 
 # License
-Apache v.2
+Creative Commons Attribution 4.0 International Public License
 
 # Author and attribution
 

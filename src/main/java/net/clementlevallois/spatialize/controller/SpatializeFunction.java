@@ -1,6 +1,7 @@
 package net.clementlevallois.spatialize.controller;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -36,20 +37,34 @@ public class SpatializeFunction {
     private static boolean silentClock = true;
 
     public static void main(String[] args) throws IOException {
+        if (args == null || args.length < 1) {
+            System.out.println("file name missing");
+            return;
+        }
+        if (!args[0].endsWith(".gexf")) {
+            System.out.println("file must be .gexf format");
+            return;
+        }
+
+        int duration = 30;
+        if (args.length == 2) {
+            duration = Integer.parseInt(args[1]);
+        }
+
         SpatializeFunction spat = new SpatializeFunction();
-        Path path = Path.of("C:\\Users\\levallois\\OneDrive - Aescra Emlyon Business School\\Bureau\\tests\\cowo--min-occ-4-words-removed.gexf");
+        Path path = Path.of(args[0]);
         String gexf = Files.readString(path);
-        spat.spatialize(gexf, 5);
+        String spatialize = spat.spatialize(gexf, duration);
+        Files.writeString(Path.of("spatialized.gexf"), spatialize);
     }
 
     public String spatialize(String gexf, int maxTimeRunningInSeconds) throws IOException {
-        clock = new Clock("clocking the layout",true);
+        clock = new Clock("clocking the layout", true);
         ProjectController projectController = Lookup.getDefault().lookup(ProjectController.class);
         GraphController graphController = Lookup.getDefault().lookup(GraphController.class);
         ImportController importController = Lookup.getDefault().lookup(ImportController.class);
         projectController.newProject();
         Container container = null;
-
 
         FileImporter fi = new ImporterGEXF();
         container = importController.importFile(new StringReader(gexf), fi);
@@ -67,10 +82,12 @@ public class SpatializeFunction {
         layout.resetPropertiesValues();
 
         int threads = Runtime.getRuntime().availableProcessors() * 2 - 1;
+        
+        System.out.println("threads being used: " + threads);
 
-        layout.setScalingRatio(5d);
+        layout.setScalingRatio(2d);
         layout.setThreadsCount(threads);
-        layout.setAdjustSizes(Boolean.TRUE);
+        layout.setAdjustSizes(Boolean.FALSE);
         layout.setJitterTolerance(2d);
         layout.setBarnesHutOptimize(Boolean.TRUE);
         layout.setBarnesHutTheta(2d);
